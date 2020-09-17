@@ -2,7 +2,9 @@ from flask import Flask,render_template, request,redirect, session
 import backend
 import os
 from datetime import date
-import shutil
+import smtplib
+from email.message import EmailMessage
+import random
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -19,6 +21,19 @@ def get_fname(s):
             break
     return n
 
+def send_mail(receiver,name):
+    otp = random.randit(1111,9999)
+    email = EmailMessage()
+    email['from'] = 'raghavkumarkakar@gmail.com'
+    email['to'] = receiver
+    email['subject'] = 'Authentication mail from Raghav kakar'
+    email.set_content('Hey {} Your otp is {}!'.format(get_fname(name)))
+    with smtplib.SMTP(host = 'smtp.gmail.com',port = 587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login('raghavkumarkakar@gmail.com','543160061')
+        smtp.send_message(email)
+    return otp
 
 @app.route('/')
 def index():
@@ -32,6 +47,7 @@ def home():
 def register():
     data = request.form.to_dict()
     rows = backend.search(data['email'],data['password'])
+    otp = send_mail(data['email'],data['name'])
     if len(rows)>=1:
         return redirect('/')
     else:
@@ -102,5 +118,16 @@ def delete(message_id):
     backend.delete_message(message_id)
     return redirect("/viewall.html")
 
+@app.route('/editpost/<int:message_id>',methods=['POST'])
+def edit(message_id):
+    message = backend.search_messages(message_id)
+    return render_template("/editpost.html",message = message[0])
+
+@app.route('/editpost/updatemessage/<int:message_id>',methods=['POST'])
+def update(message_id):
+    data = request.form.to_dict()
+    print(data)
+    backend.update(message_id,data)
+    return redirect('/viewall.html')
 
 app.run(debug=True)

@@ -70,3 +70,10 @@ def delete_message(message_id):
     cur.execute("DELETE FROM messages where message_id={}".format(message_id))
     conn.commit()
     conn.close()
+
+def update(message_id,data):
+    conn = sqlite3.connect('messaging.db')
+    cur = conn.cursor()
+    cur.execute("UPDATE messages set content=? where message_id=?",(data['emaddress'],message_id))
+    conn.commit()
+    conn.close()
