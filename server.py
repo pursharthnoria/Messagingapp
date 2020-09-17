@@ -22,16 +22,16 @@ def get_fname(s):
     return n
 
 def send_mail(receiver,name):
-    otp = random.randit(1111,9999)
+    otp = random.randint(1111,9999)
     email = EmailMessage()
-    email['from'] = 'raghavkumarkakar@gmail.com'
+    email['from'] = 'raghavdelhichennai@gmail.com'
     email['to'] = receiver
     email['subject'] = 'Authentication mail from Raghav kakar'
-    email.set_content('Hey {} Your otp is {}!'.format(get_fname(name)))
+    email.set_content('Hey {} Your otp is {}!'.format(get_fname(name),otp))
     with smtplib.SMTP(host = 'smtp.gmail.com',port = 587) as smtp:
         smtp.ehlo()
         smtp.starttls()
-        smtp.login('raghavkumarkakar@gmail.com','543160061')
+        smtp.login('raghavdelhichennai@gmail.com','Vkmehta89@@')
         smtp.send_message(email)
     return otp
 
@@ -52,7 +52,16 @@ def register():
         return redirect('/')
     else:
         backend.insert(data['email'],data['password'],data['name'],data['address'],data['city'],data['state'],data['zip'])
-        return redirect('/index.html')
+        return render_template('/verification.html',otp=otp)
+
+@app.route('/verify/<int:otp>',methods=['POST'])
+def verify(otp):
+    data = request.form.to_dict()
+    otp_ins = data['otp']
+    if int(otp) == int(otp_ins):
+        return redirect('/')
+    else:
+        return render_template('/verification.html',otp=otp)
 
 @app.route('/login',methods=['POST'])
 def login():
